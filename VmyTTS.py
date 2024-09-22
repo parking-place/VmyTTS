@@ -9,6 +9,19 @@ import VmyTTSManual
 import VmyTTSSetting
 import pyglet
 
+# 프로그램이 켜진 시간과 날짜를 기록(Asia/Seoul)
+import datetime
+now = datetime.datetime.now()
+
+# ./chatlog 폴더 생성 (있으면 생성하지 않음)
+if not os.path.exists("./chatlog"):
+    os.makedirs("./chatlogs")
+# 텍스트 백업용 파일 생성
+backup_file = f"./chatlogs/backup_{now.strftime('%Y%m%d_%H%M%S')}.txt"
+with open(backup_file, "w", encoding="utf-8") as f:
+    f.write("")
+
+
 # .keys 파일 불러오기
 keys_file = "keys.json"
 with open(keys_file, "r", encoding="utf-8") as f:
@@ -100,6 +113,11 @@ def returnEntry(arg=None):
     resultLabel.config(text=resultlabeltext + "\n" + result)
     #label_you_said를 result로 변경
     label_you_said.config(text= f'{result}')
+    
+    #백업용 파일에 "현재시간: result" 추가
+    now = datetime.datetime.now()
+    with open(backup_file, "a", encoding="utf-8") as f:
+        f.write(f"{now.strftime('%Y-%m-%d %H:%M:%S')}: {result}\n")
     
     mEntry.delete(0, END)
 
@@ -363,8 +381,11 @@ WinVolumeScale.pack()
 # 음성 초기화
 def init_playsound():
     # playsound.playsound('start0.mp3')
-    song = pyglet.media.load('start0.mp3')
-    song.play()
+    try:
+        song = pyglet.media.load('start0.mp3')
+        song.play()
+    except:
+        print("Error: ", sys.exc_info()[0])
 thread = threading.Thread(target=init_playsound)
 thread.daemon = True
 thread.start()
