@@ -1,14 +1,16 @@
 import os
 import sys
-import playsound
 import urllib.request
 from tkinter import *
-import tkinter.font
 import threading
 import json
+from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
+import VmyTTSManual
+import VmyTTSSetting
+import pyglet
 
 # .keys 파일 불러오기
-keys_file = "./keys.json"
+keys_file = "keys.json"
 with open(keys_file, "r", encoding="utf-8") as f:
     keys = json.load(f)
 
@@ -39,22 +41,35 @@ def load_settings():
     with open(settings_file, "r", encoding="utf-8") as f:
         settings = json.load(f)
         
-    # speaker.json 파일 불러오기
-    speakers_file = "./speaker.json"
-    with open(speakers_file, "r", encoding="utf-8") as f:
-        speakers_info = json.load(f)
-    # 현재 스피커의 정보를 가져오기
-    speaker_infos = speakers_info[settings["speaker"]]
-    # 정보를 이름|성별|언어 format으로 변환
-    speaker_info = f"{speaker_infos['name']}"
-    speaker_info += f"|{speaker_infos['gender']}"
-    infos = speaker_infos['info']
-    info_str = ""
-    for info in infos:
-        info_str += f"|{infos[info]}"
-    speaker_info += info_str
-    
-    settings["info"] = speaker_info
+    try:
+        # speaker.json 파일 불러오기
+        speakers_file = "./speaker.json"
+        with open(speakers_file, "r", encoding="utf-8") as f:
+            speakers_info = json.load(f)
+        # 현재 스피커의 정보를 가져오기
+        speaker_infos = speakers_info[settings["speaker"]]
+        # 정보를 이름|성별|언어 format으로 변환
+        speaker_info = f"{speaker_infos['name']}"
+        speaker_info += f"|{speaker_infos['gender']}"
+        infos = speaker_infos['info']
+        info_str = ""
+        for info in infos:
+            info_str += f"|{infos[info]}"
+        speaker_info += info_str
+        
+        settings["info"] = speaker_info
+    except:
+        settings = {
+            "speaker": "nara",
+            "volume": "0",
+            "speed": "0",
+            "pitch": "0",
+            "emotion": "0",
+            "emotion-strength" : "0",
+            "alpha": "0",
+            "info": "",
+            "WinVolume": "50",
+        }
     
     return settings
 
@@ -125,7 +140,10 @@ def makeMp3(text):
 def speak(filename):
     try:
         print("SoundPlay")
-        playsound.playsound(filename)
+        # playsound.playsound(filename)
+        song = pyglet.media.load(filename)
+        song.play()
+        # 재생이 끝나면 파일 삭제
         os.remove(filename)
     except:
         print("Error: ", sys.exc_info()[0])
@@ -136,7 +154,20 @@ def saveSettings():
     with open("config.json", "w", encoding="utf-8") as f:
         json.dump(settings, f)
         print("저장 완료")
+        
+# X버튼으로 종료시 설정 저장
+def on_closing():
+    saveSettings()
+    root.destroy()
 
+root.protocol("WM_DELETE_WINDOW", on_closing)
+
+# 정보 최신화 함수
+def refresh_info():
+    global settings
+    settings = load_settings()
+    speakerButton.config(text=f'목소리: {settings["info"]}')
+    root.after(500, refresh_info)
 
 #result
 resultLabel = Label(root, text=resultLabeltext)
@@ -174,12 +205,11 @@ mEntry.pack()
 
 # ./VmyTTSSetting.py 실행해주는 함수
 def setting():
-    os.system('python VmyTTSSetting.py')
-    
+    # os.system('python VmyTTSSetting.py')
+    VmyTTSSetting.new_window_settings()
     # 설정 다시 불러오기
     global settings
     settings = load_settings()
-    
     # 설정 정보 업데이트
     speakerButton.config(text=f'목소리: {settings["info"]}')
     
@@ -199,15 +229,14 @@ speakerButton.pack()
 
 # 설정 설명 새창에서 여는 함수
 def newWindowManual():
-    os.system("python VmyTTSManual.py")
+    # os.system("python VmyTTSManual.py")
+    VmyTTSManual.new_window_manual()
+    
     
 # 설정 설명 버튼(우하단 정렬)
 manualButton = Button(root, text="옵션 설명", command=newWindowManual)
 manualButton.pack(anchor=S)
 
-# play sound 볼륨 조절 함수
-def play_sound():
-    playsound.playsound('start0.mp3')
     
 
 # # 볼륨 조절 바(v_size = 0.30, 0.00~1.00)
@@ -302,8 +331,6 @@ saveButton = Button(root, text="설정 적용", command=saveSettings_btn_func)
 saveButton.pack()
 
 
-from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
-
 # 전체볼륨조절바 (0 ~ 100)
 WinVolume = 50
 WinVolume = int(settings["WinVolume"])
@@ -335,10 +362,15 @@ WinVolumeScale.pack()
 
 # 음성 초기화
 def init_playsound():
-    playsound.playsound('start0.mp3')
+    # playsound.playsound('start0.mp3')
+    song = pyglet.media.load('start0.mp3')
+    song.play()
 thread = threading.Thread(target=init_playsound)
 thread.daemon = True
 thread.start()
+
+# refresh_info 함수 0.5초마다 실행
+root.after(500, refresh_info)
 
 #기본 루프
 root.mainloop()

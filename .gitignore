@@ -3,3 +3,13 @@ keys.json
 .venv/*
 etc
 etc/*
+datas
+datas/*
+dist
+dist/*
+build
+build/*
+*.spec
+__pycache__
+__pycache__/
+__pycache__/*
