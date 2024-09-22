@@ -14,7 +14,7 @@ import datetime
 now = datetime.datetime.now()
 
 # ./chatlog 폴더 생성 (있으면 생성하지 않음)
-if not os.path.exists("./chatlog"):
+if not os.path.exists("./chatlogs"):
     os.makedirs("./chatlogs")
 # 텍스트 백업용 파일 생성
 backup_file = f"./chatlogs/backup_{now.strftime('%Y%m%d_%H%M%S')}.txt"
