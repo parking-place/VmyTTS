@@ -376,6 +376,11 @@ WinVolumeScale = Scale(root, from_=0, to=100, orient=HORIZONTAL, length=200, com
 WinVolumeScale.set(WinVolume)
 WinVolumeScale.pack()
 
+# by Parking_Place
+# 폰트 크기 7, 맑은 고딕, 우하단 정렬, 회색
+MadeMyLabel = Label(root, text="by @Parking_Place", font=("맑은 고딕", 8), fg="gray")
+MadeMyLabel.pack(anchor=SE)
+
 
 
 
