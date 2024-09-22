@@ -31,6 +31,8 @@ client_id = keys["client_id"]
 client_secret = keys["client_secret"]
 
 # tinkter 폰트 설정
+font_size_log = ("맑은 고딕", 15, "bold")
+font_size_label = ("맑은 고딕", 18, "bold")
 
 
 url = "https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts"
