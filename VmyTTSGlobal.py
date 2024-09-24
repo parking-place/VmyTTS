@@ -1,7 +1,7 @@
 import json
 from VmyTTSSpeakers import SPEAKERS
 
-VERSION = "0.2.1 a"
+VERSION = "0.3.0 a"
 
 URL = "https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts"
 
@@ -20,7 +20,8 @@ SETTINGS = {
     "alpha": "0",
     "info": "",
     "WinVolume": "50",
-    "Mutemode": "False",
+    "Mutemode": False,
+    "shortcut-abled": True,
 }
 
 DEFAULT_SETTINGS = {
@@ -33,7 +34,26 @@ DEFAULT_SETTINGS = {
     "alpha": "0",
     "info": "",
     "WinVolume": "50",
-    "Mutemode": "False",
+    "Mutemode": False,
+    "shortcut-abled": True,
+}
+
+DEDEFAULT_SHORTCUTS = {
+    "ㅋ" : "키",
+    "ㄹㅇ": "리얼",
+    "ㅇㅈ" : "인정",
+    "ㄱㅅ" : "감사",
+    "ㅈㅅ" : "죄송",
+    "ㅂㅇ" : "바이",
+    "ㄱㅊ" : "갠찬",
+    "ㅎㅇ" : "하이",
+    "ㅇㅎ" : "아하",
+    "ㅂㅂ" : "바이바이",
+    "ㄱㄱ" : "고고",
+    "ㅅㄱ" : "수고",
+    "ㅇㄷ?" : "어디?",
+    "ㅁㅇㅁㅇ" : "모야모야",
+    "ㅁㅇ?" : "머임?",
 }
 
 class VmyTTSSingleton:
@@ -45,6 +65,9 @@ class VmyTTSSingleton:
     settings = {}
     default_settings = {}
     info_refreshing_func = None
+    shortcut  = {}
+    defalut_shortcuts = {}
+    shortcut_abled = True
     
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
@@ -63,7 +86,10 @@ class VmyTTSSingleton:
         self.client_auth = CLIENT_AUTH
         self.settings = SETTINGS
         self.default_settings = DEFAULT_SETTINGS
+        self.default_shortcuts = DEDEFAULT_SHORTCUTS
+        self.shortcut_abled = True
         
+        self.load_shortcuts()
         self.load_settings()
         self.load_keys()
     
@@ -84,6 +110,19 @@ class VmyTTSSingleton:
     
     def get_default_settings(self):
         return self.default_settings
+    
+    def get_shortcuts(self):
+        return self.shortcut
+    
+    def get_default_shortcuts(self):
+        return self.default_shortcuts
+    
+    def set_shortcuts(self, shortcuts):
+        self.shortcut = shortcuts
+        self.save_shortcuts()
+    
+    def set_shortcut_abled(self, abled):
+        self.shortcut_abled = abled
 
     def set_settings(self, settings):
         self.settings = settings
@@ -141,9 +180,25 @@ class VmyTTSSingleton:
         
         # 불러온 세팅에 뮤트모드가 없을 경우 추가
         if "Mutemode" not in self.settings:
-            self.settings["Mutemode"] = "False"
+            self.settings["Mutemode"] = False
             self.save_settings()
-            
+        
+        # 불러온 세팅에 단축어 사용여부가 없을 경우 추가
+        if "shortcut-abled" not in self.settings:
+            self.settings["shortcut-abled"] = True
+            self.save_settings()
+        
+    def load_shortcuts(self):
+        try:
+            with open("shortcut.json", "r", encoding="utf-8") as f:
+                self.shortcut = json.load(f)
+        except:
+            self.shortcut = self.default_shortcuts
+            self.save_shortcuts()
+    
+    def save_shortcuts(self):
+        with open("shortcut.json", "w", encoding="utf-8") as f:
+            json.dump(self.shortcut, f)
     
     def save_settings(self):
         with open("config.json", "w", encoding="utf-8") as f:
@@ -156,3 +211,8 @@ class VmyTTSSingleton:
         
         self.client_auth["client_id"] = keys["client_id"]
         self.client_auth["client_secret"] = keys["client_secret"]
+    
+    def replace_shortcut(self, text):
+        for key, value in self.shortcut.items():
+            text = text.replace(key, value)
+        return text

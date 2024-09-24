@@ -7,6 +7,7 @@ import json
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 import VmyTTSManual
 # import VmyTTSSetting
+import VmyTTSShortCut
 import VmyTTSGeneralSettings
 import VmyTTSVoiceSettings
 from VmyTTSGlobal import VmyTTSSingleton
@@ -154,10 +155,14 @@ def main_window():
         mEntry.delete(0, END)
         # 현재 설정 저장
         VmyTTSSingleton.getInstance().set_settings(SETTINGS)
-        
-        if SETTINGS["Mutemode"] == "False":
-            # 음소거가 아닐 경우
-            thread = threading.Thread(target=makeMp3, args=(CURRENT_TEXT,))
+        print(SETTINGS)
+        # 음소거가 아닐 경우
+        if not SETTINGS["Mutemode"]:
+            replaced_text = CURRENT_TEXT
+            # 단축어가 있을 경우
+            if SETTINGS["shortcut-abled"]:
+                replaced_text = VmyTTSSingleton.getInstance().replace_shortcut(CURRENT_TEXT)
+            thread = threading.Thread(target=makeMp3, args=(replaced_text,))
             thread.daemon = True
             thread.start()
     
@@ -174,6 +179,11 @@ def main_window():
     def new_window_general_setting():
         # os.system('python VmyTTSSetting.py')
         VmyTTSGeneralSettings.new_window_settings()
+        
+    # 새창에서 단축어 설정 창을 띄우는 함수
+    def new_window_shortcut():
+        # os.system('python VmyTTSShortCut.py')
+        VmyTTSShortCut.new_window_shortcut()
         
     # 전체 볼륨 조절 함수
     def setWinVolume(*args):
@@ -194,17 +204,18 @@ def main_window():
     # 음소거 체크박스 함수
     def setMute():
         SETTINGS = VmyTTSSingleton.getInstance().get_settings()
-        if SETTINGS["Mutemode"] == "False":
-            SETTINGS["Mutemode"] = "True"
-        else:
-            SETTINGS["Mutemode"] = "False"
-        
+        SETTINGS["Mutemode"] = not SETTINGS["Mutemode"]
         VmyTTSSingleton.getInstance().set_settings(SETTINGS)
     
     # 정보 최신화 함수
     def refresh_info():
+        # 설정 정보 업데이트
         speakerButton.config(
             text=f'목소리: {VmyTTSSingleton.getInstance().get_settings()["info"]}'
+            )
+        # 단축어 사용여부 업데이트
+        shortcutButton.config(
+            text=f'단축어 사용: {VmyTTSSingleton.getInstance().get_settings()["shortcut-abled"]}'
             )
     
     # TK 창 생성
@@ -242,6 +253,9 @@ def main_window():
     # 한 프레임에서 좌우로 배치
     settingFrame = Frame(root)
     settingFrame.pack()
+    # 단축어 설정 버튼
+    shortcutButton = Button(settingFrame, text="단축어 설정", command=new_window_shortcut)
+    shortcutButton.pack(side=LEFT)
     # 목소리 설정 버튼
     speakerButton = Button(settingFrame, text=f'목소리: {SETTINGS["info"]}', command=new_window_voice_setting)
     speakerButton.pack(side=LEFT)
@@ -255,6 +269,8 @@ def main_window():
     volumeFrame.pack()
     # 음소거 체크박스
     muteCheck = Checkbutton(volumeFrame, text="음소거", command=setMute)
+    # 음소거 모드여부에 따라 체크박스 체크
+    muteCheck.select() if SETTINGS["Mutemode"] else 0
     muteCheck.pack(side=LEFT)
     # 전체 볼륨 조절
     WinVolumeScale = Scale(volumeFrame, from_=0, to=100, orient=HORIZONTAL, length=200, command=setWinVolume)
