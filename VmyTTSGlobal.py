@@ -1,7 +1,7 @@
 import json
 from VmyTTSSpeakers import SPEAKERS
 
-VERSION = "0.2.0 a"
+VERSION = "0.2.1 a"
 
 URL = "https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts"
 

@@ -246,7 +246,7 @@ def main_window():
     speakerButton = Button(settingFrame, text=f'목소리: {SETTINGS["info"]}', command=new_window_voice_setting)
     speakerButton.pack(side=LEFT)
     # 일반 설정 버튼
-    generalButton = Button(settingFrame, text="일반 설정", command=new_window_general_setting)
+    generalButton = Button(settingFrame, text="상세 설정", command=new_window_general_setting)
     generalButton.pack(side=RIGHT)
     
     # 음소거 체크박스, 전체볼륨조절바 (0 ~ 100)

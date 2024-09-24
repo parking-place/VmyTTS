@@ -9,6 +9,9 @@ def new_window_settings():
     
     setlevel = Toplevel()
     
+    # TK 창 이름 설정
+    setlevel.title("목소리 상세 설정")
+    
     # 설정 설명 새창에서 여는 함수
     def newWindowManual():
         # os.system("python VmyTTSManual.py")
