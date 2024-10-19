@@ -141,12 +141,31 @@ def new_window_settings():
         )
     pitchScale.pack(side=LEFT)
 
+    # 저장 버튼 함수
+    def save_settings():
+        settings["volume"] = volumeVar.get()
+        settings["speed"] = speedVar.get()
+        settings["pitch"] = pitchVar.get()
+        settings["alpha"] = alphaVar.get()
+        settings["emotion"] = emotionVar.get()
+        settings["emotion-strength"] = emotionStrengthVar.get()
+        
+        print(settings)
+        VmyTTSSingleton.getInstance().set_settings(settings)
+    # 저장 버튼(하단 중앙 정렬)
+    saveButton = Button(setlevel, text="저장", command=save_settings)
+    saveButton.pack()
+
     # 닫기 버튼 함수
     def closeWindow_btn_func():
         setlevel.destroy()
     # 닫기 버튼(하단 중앙 정렬)
     saveButton = Button(setlevel, text="닫기", command=closeWindow_btn_func)
     saveButton.pack()
+    
+
+    
+    
     
     
     pass
